@@ -35,9 +35,9 @@ def requests_session_with_retries(retries=3, backoff_factor=0.3, status_forcelis
     )
     adapter = HTTPAdapter(
         max_retries=retry,
-        pool_connections=1000,
-        pool_maxsize=10000,
-        pool_block=False
+        pool_connections=100,
+        pool_maxsize=1000,
+        pool_block=True
     )
     session.mount("http://", adapter)
     session.mount("https://", adapter)

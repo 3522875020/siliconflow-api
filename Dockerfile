@@ -41,10 +41,13 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 # 使用gunicorn作为生产服务器
 CMD ["gunicorn", "--bind", "0.0.0.0:10000", \
-     "--workers", "4", \
-     "--worker-class", "gthread", \
-     "--threads", "4", \
+     "--workers", "$(( 2 * $(nproc) + 1 ))", \
+     "--worker-class", "gevent", \
+     "--worker-connections", "1000", \
      "--timeout", "600", \
+     "--keepalive", "5", \
+     "--max-requests", "10000", \
+     "--max-requests-jitter", "1000", \
      "--access-logfile", "-", \
      "--error-logfile", "-", \
      "--log-level", "info", \
