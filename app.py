@@ -1491,6 +1491,16 @@ logging.info("首次加载 keys 已手动触发执行")
 refresh_models()
 logging.info("首次刷新模型列表已手动触发执行")
 
-# 设置端口配置
-port = int(os.environ.get('PORT', 7860))
-app.run(debug=False, host='0.0.0.0', port=port)
+if __name__ == '__main__':
+    # 设置日志级别
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    
+    # 获取端口配置
+    port = int(os.environ.get('PORT', 7860))
+    
+    # 启动应用
+    logging.info(f"Starting application on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=False)

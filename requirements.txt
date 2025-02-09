@@ -3,3 +3,4 @@ requests
 Pillow
 apscheduler
 Werkzeug
+gunicorn
