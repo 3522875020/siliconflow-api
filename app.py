@@ -848,11 +848,11 @@ def handsome_chat_completions():
                                             if delta.get("reasoning_content") is not None:
                                                 reasoning_chunk = delta["reasoning_content"]
                                                 if first_reasoning_chunk:
-                                                    think_chunk = f"<"
+                                                    think_chunk = "<"
                                                     yield f"data: {json.dumps({'choices': [{'delta': {'content': think_chunk}, 'index': 0}]})}\n\n"
-                                                    think_chunk = f"think"
+                                                    think_chunk = "think"
                                                     yield f"data: {json.dumps({'choices': [{'delta': {'content': think_chunk}, 'index': 0}]})}\n\n"
-                                                    think_chunk = f">\n"
+                                                    think_chunk = ">\\n"
                                                     yield f"data: {json.dumps({'choices': [{'delta': {'content': think_chunk}, 'index': 0}]})}\n\n"
                                                     first_reasoning_chunk = False
                                                 yield f"data: {json.dumps({'choices': [{'delta': {'content': reasoning_chunk}, 'index': 0}]})}\n\n"
@@ -914,13 +914,13 @@ def handsome_chat_completions():
                                         )
                     user_content = user_content.strip()
                     user_content_replaced = user_content.replace(
-                        '\n', '\\n'
-                    ).replace('\r', '\\n')
+                        '\n', '\\\\n'
+                    ).replace('\r', '\\\\n')
                     response_content_replaced = (
                                                             f"```Thinking\n{reasoning_content_accumulated}\n```\n" if reasoning_content_accumulated else "") + content_accumulated
                     response_content_replaced = response_content_replaced.replace(
-                        '\n', '\\n'
-                    ).replace('\r', '\\n')
+                        '\n', '\\\\n'
+                    ).replace('\r', '\\\\n')
                     logging.info(
                         f"使用的key: {api_key}, "
                         f"提示token: {prompt_tokens}, "
@@ -964,7 +964,8 @@ def handsome_chat_completions():
                                             yield f"data: {json.dumps({'choices': [{'delta': {'content': reasoning_chunk}, 'index': 0}]})}\n\n"
                                         if delta.get("content") is not None:
                                             if not first_reasoning_chunk:
-                                                yield f"data: {json.dumps({'choices': [{'delta': {'content': '\n\n'}, 'index': 0}]})}\n\n"
+                                                newline = "\\n\\n"
+                                                yield f"data: {json.dumps({'choices': [{'delta': {'content': newline}, 'index': 0}]})}\n\n"
                                                 first_reasoning_chunk = True
                                             content = delta.get("content")
                                             yield f"data: {json.dumps({'choices': [{'delta': {'content': content}, 'index': 0}]})}\n\n"
@@ -1019,13 +1020,13 @@ def handsome_chat_completions():
                                     )
                 user_content = user_content.strip()
                 user_content_replaced = user_content.replace(
-                    '\n', '\\n'
-                ).replace('\r', '\\n')
+                    '\n', '\\\\n'
+                ).replace('\r', '\\\\n')
                 response_content_replaced = (
                                                     f"```Thinking\n{reasoning_content_accumulated}\n```\n" if reasoning_content_accumulated else "") + content_accumulated
                 response_content_replaced = response_content_replaced.replace(
-                    '\n', '\\n'
-                ).replace('\r', '\\n')
+                    '\n', '\\\\n'
+                ).replace('\r', '\\\\n')
                 logging.info(
                     f"使用的key: {api_key}, "
                     f"提示token: {prompt_tokens}, "
@@ -1100,11 +1101,11 @@ def handsome_chat_completions():
                                 )
             user_content = user_content.strip()
             user_content_replaced = user_content.replace(
-                '\n', '\\n'
-            ).replace('\r', '\\n')
+                '\n', '\\\\n'
+            ).replace('\r', '\\\\n')
             response_content_replaced = response_content.replace(
-                '\n', '\\n'
-            ).replace('\r', '\\n')
+                '\n', '\\\\n'
+            ).replace('\r', '\\\\n')
             logging.info(
                 f"使用的key: {api_key}, "
                 f"提示token: {prompt_tokens}, "
@@ -1405,11 +1406,11 @@ def handsome_chat_completions():
                                 )
                     user_content = extract_user_content(data.get("messages", []))
                     user_content_replaced = user_content.replace(
-                        '\n', '\\n'
-                    ).replace('\r', '\\n')
+                        '\n', '\\\\n'
+                    ).replace('\r', '\\\\n')
                     response_content_replaced = response_content.replace(
-                        '\n', '\\n'
-                    ).replace('\r', '\\n')
+                        '\n', '\\\\n'
+                    ).replace('\r', '\\\\n')
                     logging.info(
                         f"使用的key: {api_key}, "
                         f"提示token: {prompt_tokens}, "
@@ -1487,16 +1488,16 @@ def handsome_chat_completions():
                                     )
                 user_content = user_content.strip()
                 user_content_replaced = user_content.replace(
-                    '\n', '\\n'
-                ).replace('\r', '\\n')
+                    '\n', '\\\\n'
+                ).replace('\r', '\\\\n')
                 response_content_replaced = response_content.replace(
-                    '\n', '\\n'
-                ).replace('\r', '\\n')
+                    '\n', '\\\\n'
+                ).replace('\r', '\\\\n')
                 logging.info(
                     f"使用的key: {api_key}, "
                     f"提示token: {prompt_tokens}, "
                     f"输出token: {completion_tokens}, "
-                    f"首字用时: 0, "
+                    f"首字用时: {first_token_time:.4f}秒, "
                     f"总共用时: {total_time:.4f}秒, "
                     f"使用的模型: {model_name}, "
                     f"用户的内容: {user_content_replaced}, "
