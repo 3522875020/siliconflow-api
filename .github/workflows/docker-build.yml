@@ -21,6 +21,43 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Generate timestamp tag
+        id: timestamp
+        run: |
+          # 生成一个6位的唯一标识：1位月份(1-9,a-c) + 2位日期(01-31) + 1位小时(0-9,a-n) + 1位10分钟区间(0-5) + 1位分钟个位(0-9)
+          month=$(date +'%-m')
+          if [ "$month" -gt "9" ]; then
+            case "$month" in
+              "10") month="a" ;;
+              "11") month="b" ;;
+              "12") month="c" ;;
+            esac
+          fi
+          
+          hour=$(date +'%-H')
+          if [ "$hour" -gt "9" ]; then
+            case "$hour" in
+              "10") hour="a" ;;
+              "11") hour="b" ;;
+              "12") hour="c" ;;
+              "13") hour="d" ;;
+              "14") hour="e" ;;
+              "15") hour="f" ;;
+              "16") hour="g" ;;
+              "17") hour="h" ;;
+              "18") hour="i" ;;
+              "19") hour="j" ;;
+              "20") hour="k" ;;
+              "21") hour="l" ;;
+              "22") hour="m" ;;
+              "23") hour="n" ;;
+            esac
+          fi
+          
+          minute_block=$(($(date +'%-M') / 10))
+          minute_digit=$(($(date +'%-M') % 10))
+          echo "tag=${month}$(date +'%d')${hour}${minute_block}${minute_digit}" >> $GITHUB_OUTPUT
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -34,10 +71,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=sha,format=long
+            type=raw,value=${{ steps.timestamp.outputs.tag }}
+            type=raw,value=latest
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

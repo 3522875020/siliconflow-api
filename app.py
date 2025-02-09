@@ -1491,7 +1491,6 @@ logging.info("首次加载 keys 已手动触发执行")
 refresh_models()
 logging.info("首次刷新模型列表已手动触发执行")
 
-if __name__ == '__main__':
-    # 注意：在 Vercel 上部署时，不需要 app.run()。
-    # 这里保留 app.run 是为了方便本地调试
-    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 7860)))
+# 设置端口配置
+port = int(os.environ.get('PORT', 7860))
+app.run(debug=False, host='0.0.0.0', port=port)
