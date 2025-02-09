@@ -1,6 +1,7 @@
-Flask
-requests
-Pillow
-apscheduler
-Werkzeug
-gunicorn
+Flask==2.3.3
+requests==2.31.0
+Pillow==10.0.0
+apscheduler==3.10.4
+Werkzeug==2.3.7
+gunicorn==21.2.0
+python-dotenv==1.0.0
