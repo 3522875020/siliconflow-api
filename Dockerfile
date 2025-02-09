@@ -18,6 +18,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
+# 创建日志目录
+RUN mkdir -p /app/logs
+
 # 复制依赖文件
 COPY requirements.txt .
 
@@ -48,7 +51,9 @@ CMD ["gunicorn", "--bind", "0.0.0.0:10000", \
      "--keepalive", "5", \
      "--max-requests", "10000", \
      "--max-requests-jitter", "1000", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-", \
-     "--log-level", "info", \
+     "--access-logfile", "/app/logs/access.log", \
+     "--error-logfile", "/app/logs/error.log", \
+     "--log-level", "debug", \
+     "--capture-output", \
+     "--enable-stdio-inheritance", \
      "app:app"] 
