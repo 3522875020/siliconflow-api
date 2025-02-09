@@ -1491,15 +1491,23 @@ logging.info("首次加载 keys 已手动触发执行")
 refresh_models()
 logging.info("首次刷新模型列表已手动触发执行")
 
+# 设置日志级别
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+
+# 添加基本的健康检查端点
+@app.route('/health')
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
 if __name__ == '__main__':
-    # 设置日志级别
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
     # 获取端口配置
-    port = int(os.environ.get('PORT', 7860))
+    port = int(os.environ.get('PORT', 8000))
     
     # 启动应用
     logging.info(f"Starting application on port {port}")
