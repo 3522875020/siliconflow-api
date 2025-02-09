@@ -861,7 +861,8 @@ def handsome_chat_completions():
                                                     reasoning_chunk = f"\n</think>\n"
                                                     yield f"data: {json.dumps({'choices': [{'delta': {'content': reasoning_chunk}, 'index': 0}]})}\n\n"
                                                     first_reasoning_chunk = True
-                                                yield f"data: {json.dumps({'choices': [{'delta': {'content': delta["content"]}, 'index': 0}]})}\n\n"
+                                                content = delta.get("content")
+                                                yield f"data: {json.dumps({'choices': [{'delta': {'content': content}, 'index': 0}]})}\n\n"
                                     except (KeyError, ValueError, json.JSONDecodeError) as e:
                                         continue
                     end_time = time.time()
@@ -965,7 +966,8 @@ def handsome_chat_completions():
                                             if not first_reasoning_chunk:
                                                 yield f"data: {json.dumps({'choices': [{'delta': {'content': '\n\n'}, 'index': 0}]})}\n\n"
                                                 first_reasoning_chunk = True
-                                            yield f"data: {json.dumps({'choices': [{'delta': {'content': delta["content"]}, 'index': 0}]})}\n\n"
+                                            content = delta.get("content")
+                                            yield f"data: {json.dumps({'choices': [{'delta': {'content': content}, 'index': 0}]})}\n\n"
                                 except (KeyError, ValueError, json.JSONDecodeError) as e:
                                     continue
                 end_time = time.time()
@@ -1437,9 +1439,28 @@ def handsome_chat_completions():
                     completion_tokens = response_json[
                         "usage"
                     ]["completion_tokens"]
-                    response_content = response_json[
-                        "choices"
-                    ][0]["message"]["content"]
+                    response_content = ""
+                    if model_name.endswith("-thinking") and "choices" in response_json and len(
+                            response_json["choices"]) > 0:
+                        choice = response_json["choices"][0]
+                        if "message" in choice:
+                            if "reasoning_content" in choice["message"]:
+                                reasoning_content = choice["message"]["reasoning_content"]
+                                reasoning_content = reasoning_content.replace('\n', '\n> ')
+                                reasoning_content = '> ' + reasoning_content
+                                formatted_reasoning = f"{reasoning_content}\n"
+                                response_content += formatted_reasoning + "\n"
+                            if "content" in choice["message"]:
+                                response_content += choice["message"]["content"]
+                    elif model_name.endswith("-openwebui") and "choices" in response_json and len(
+                            response_json["choices"]) > 0:
+                        choice = response_json["choices"][0]
+                        if "message" in choice:
+                            if "reasoning_content" in choice["message"]:
+                                reasoning_content = choice["message"]["reasoning_content"]
+                                response_content += f"<think>\n{reasoning_content}\n</think>\n"
+                            if "content" in choice["message"]:
+                                response_content += choice["message"]["content"]
                 except (KeyError, ValueError, IndexError) as e:
                     logging.error(
                         f"解析非流式响应 JSON 失败: {e}, "
@@ -1448,7 +1469,23 @@ def handsome_chat_completions():
                     prompt_tokens = 0
                     completion_tokens = 0
                     response_content = ""
-                user_content = extract_user_content(data.get("messages", []))
+                user_content = ""
+                messages = data.get("messages", [])
+                for message in messages:
+                    if message["role"] == "user":
+                        if isinstance(message["content"], str):
+                            user_content += message["content"] + " "
+                        elif isinstance(message["content"], list):
+                            for item in message["content"]:
+                                if (
+                                        isinstance(item, dict) and
+                                        item.get("type") == "text"
+                                ):
+                                    user_content += (
+                                            item.get("text", "") +
+                                            " "
+                                    )
+                user_content = user_content.strip()
                 user_content_replaced = user_content.replace(
                     '\n', '\\n'
                 ).replace('\r', '\\n')
@@ -1467,17 +1504,9 @@ def handsome_chat_completions():
                 )
                 with data_lock:
                     request_timestamps.append(time.time())
-                    if "prompt_tokens" in response_json["usage"] and "completion_tokens" in response_json["usage"]:
-                        token_counts.append(
-                            response_json["usage"]["prompt_tokens"] + response_json["usage"]["completion_tokens"])
-                    else:
-                        token_counts.append(0)
+                    token_counts.append(prompt_tokens + completion_tokens)
                     request_timestamps_day.append(time.time())
-                    if "prompt_tokens" in response_json["usage"] and "completion_tokens" in response_json["usage"]:
-                        token_counts_day.append(
-                            response_json["usage"]["prompt_tokens"] + response_json["usage"]["completion_tokens"])
-                    else:
-                        token_counts_day.append(0)
+                    token_counts_day.append(prompt_tokens + completion_tokens)
                 return jsonify(response_json)
         except requests.exceptions.RequestException as e:
             logging.error(f"请求转发异常: {e}")
