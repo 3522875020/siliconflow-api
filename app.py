@@ -1503,11 +1503,11 @@ logging.basicConfig(
 # 添加基本的健康检查端点
 @app.route('/health')
 def health_check():
-    return jsonify({"status": "healthy"}), 200
+    return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()}), 200
 
 if __name__ == '__main__':
     # 获取端口配置
-    port = int(os.environ.get('PORT', 8000))
+    port = int(os.environ.get('PORT', 10000))
     
     # 启动应用
     logging.info(f"Starting application on port {port}")

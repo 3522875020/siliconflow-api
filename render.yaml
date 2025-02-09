@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: siliconflow-api
+    env: docker
+    region: singapore  # 选择新加坡区域，可以根据需要更改
+    plan: starter  # 免费计划
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.9.0
+    dockerCommand: gunicorn --bind 0.0.0.0:10000 --workers 4 --timeout 600 app:app 
